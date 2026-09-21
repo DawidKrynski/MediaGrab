@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mediagrab"
+version = "0.1.2"
+description = "Desktop video and image downloader with clipboard launch and file manager integration"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md", "docs/LICENSING.md"]
+requires-python = ">=3.11"
+keywords = ["linux", "windows", "media-downloader", "video-downloader", "image-downloader", "yt-dlp", "gallery-dl", "pyside6", "clipboard"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: X11 Applications :: Qt",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Multimedia :: Graphics",
+]
+dependencies = ["PySide6>=6.8,<7", "yt-dlp[default,curl-cffi]>=2026.8.19", "gallery-dl>=1.32.12,<2", "dbus-next>=0.2.3,<1; sys_platform == 'linux'", "requests>=2.32,<3"]
+
+[project.optional-dependencies]
+test = ["pytest>=8", "pytest-qt>=4.4", "ruff>=0.12"]
+
+[project.scripts]
+mediagrab = "mediagrab.gui:main"
+
+[tool.setuptools.package-data]
+mediagrab = ["assets/*.svg"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+qt_api = "pyside6"
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "B"]

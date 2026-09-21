@@ -1,0 +1,44 @@
+.venv/
+venv/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+*.py[cod]
+
+# Build output and local tooling.
+build/
+dist/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# Credentials, private preferences, and local download state.
+.env
+.env.*
+!.env.example
+cookies.txt
+cookies*.txt
+*.cookies
+*.pem
+*.key
+MediaGrab.conf
+.mediagrab-*/
+.mediagrab.*
+downloads/
+*.part
+*.ytdl
+*.sqlite
+*.sqlite3
+*.sqlite3-*
+*.db
+*.db-*
+*.log
+
+# Editor and desktop metadata.
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
