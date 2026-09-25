@@ -31,7 +31,7 @@ def assemble(frozen, notices, output):
     check_no_addons(folder)
     notices_text = (folder / "THIRD_PARTY_NOTICES.txt").read_text(encoding="utf-8")
     for marker in ("GNU LESSER GENERAL PUBLIC LICENSE", "Qt third-party attributions",
-                   "curl_cffi's libcurl-impersonate", "gallery-dl", "PYTHON SOFTWARE FOUNDATION LICENSE"):
+                   "curl_cffi's libcurl-impersonate", "sources/gallery_dl-", "PYTHON SOFTWARE FOUNDATION LICENSE"):
         if marker.lower() not in notices_text.lower():
             raise RuntimeError(f"THIRD_PARTY_NOTICES.txt lacks {marker!r}")
     return folder
