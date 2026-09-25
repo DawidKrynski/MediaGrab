@@ -4,6 +4,39 @@ MediaGrab separates automated application checks from native desktop observation
 and live website compatibility. A passing local download test does not establish
 access to an external website.
 
+## Portable Windows package — 2026-09-25
+
+`tools/build_windows.ps1` built `MediaGrab-Windows-x64.zip` (53.3 MB, 102 MB
+extracted) in the **Windows 11 VM, build 26200**, from Python 3.13.15 with the pinned
+build requirements (PySide6 6.11.2, yt-dlp 2026.8.19, gallery-dl 1.32.13,
+PyInstaller 6.22.3). Before packaging, the build environment passed
+**130 tests with 4 Linux-only checks skipped**, including all five real-engine
+loopback tests, plus Ruff and `uv pip check`. The copied package then passed the
+five real-engine tests again through its own `mediagrab-engine.exe`.
+
+The ZIP was then checked in a new `C:\MediaGrabPortableTest` directory with only
+Windows and FFmpeg 9.0.2 on PATH (no Python, no `PYTHONPATH`):
+
+- **Archive:** SHA-256 matched `SHA256SUMS.txt`; the folder holds both executables,
+  `_internal`, `README.txt`, `LICENSE.txt`, `THIRD_PARTY_NOTICES.txt`, and `sources`.
+- **Helper:** reported yt-dlp 2026.08.19 and gallery-dl 1.32.13 and refused
+  arbitrary `-c` code with exit status 2.
+- **Clipboard launch:** with a loopback URL on the Windows clipboard and a
+  destination containing non-ASCII characters, `MediaGrab.exe` saved a generated
+  image byte-for-byte and a generated H.264/AAC video with both streams, then
+  exited on its own. Relaunching with the image URL added no file.
+- **Loaded code:** the full window's process loaded only modules from the package
+  folder and the Windows directory (plus the Defender scan hook).
+- **Native full window (noVNC):** inspecting and downloading the local image
+  showed `Finished · 1 file(s) available · 1 already downloaded · 0 failed`.
+  Explorer opened the right folder; a window left over from an earlier run first
+  showed it as empty and, after a refresh, listed both files with the image selected.
+
+Limits: one Windows 11 x64 VM; no real website, YouTube JavaScript runtime,
+SmartScreen prompt, code signing, or first run from a download marked with
+Mark of the Web. The same Linux build of the spec also passed the five real-engine
+tests through its helper, which checks the helper only, not a Linux release.
+
 ## Linux regression check after Windows changes — 2026-09-21
 
 The final source suite and a fresh non-editable wheel installation each passed
@@ -112,5 +145,5 @@ Cookie tests use synthetic files, not real credentials. Run the commands in
 - A successful D-Bus call does not prove that a nonconforming file manager selected
   files visually.
 - Crash/power-loss recovery, multi-hour downloads, remote filesystems, other Linux
-  distributions/desktops, additional Windows configurations, and macOS behavior
-  are not established here.
+  distributions/desktops, additional Windows configurations, Windows on ARM, and
+  macOS behavior are not established here.
