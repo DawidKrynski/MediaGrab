@@ -3,12 +3,12 @@
 import hashlib
 import json
 import shutil
-import sys
 from pathlib import Path
 
 from .models import CollectionRequired, Inspection, MediaError, MediaItem
 from .process import classify_error
 from .routing import is_single_url, source_name
+from .runtime import engine_command
 
 MAX_ITEMS = 100
 
@@ -60,9 +60,7 @@ class YtDlpAdapter:
 
     def base(self):
         args = [
-            sys.executable,
-            "-m",
-            "yt_dlp",
+            *engine_command("yt_dlp"),
             "--ignore-config",
             "--no-colors",
             "--no-playlist",
@@ -239,9 +237,7 @@ class GalleryAdapter:
 
     def base(self):
         args = [
-            sys.executable,
-            "-m",
-            "gallery_dl",
+            *engine_command("gallery_dl"),
             "--config-ignore",
             "--no-input",
             "--no-colors",

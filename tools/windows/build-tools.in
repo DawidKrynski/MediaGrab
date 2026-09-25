@@ -1,0 +1,2 @@
+# PyInstaller build tool for the portable Windows package; see tools/build_windows.ps1.
+pyinstaller>=6.16

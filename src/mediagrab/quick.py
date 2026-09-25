@@ -2,7 +2,6 @@
 
 from pathlib import Path
 import subprocess
-import sys
 
 from PySide6.QtCore import QSettings, Qt, QTimer, Signal
 from PySide6.QtGui import QIcon
@@ -24,6 +23,7 @@ from .gui import Worker
 from .models import MediaError
 from .preferences import download_destination
 from .routing import is_single_url, validate_url
+from .runtime import application_command
 
 
 def clipboard_url(text):
@@ -133,7 +133,7 @@ class QuickWindow(QDialog):
 
     def open_advanced(self):
         subprocess.Popen(
-            [sys.executable, "-m", "mediagrab", "--advanced"],
+            application_command("--advanced"),
             stdin=subprocess.DEVNULL,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,

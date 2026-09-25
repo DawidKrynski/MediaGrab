@@ -8,9 +8,9 @@ import ctypes
 from ctypes import wintypes
 from pathlib import Path
 import subprocess
-import sys
 
 from .models import MediaError
+from . import runtime
 
 
 kernel = ctypes.WinDLL("kernel32", use_last_error=True)
@@ -118,22 +118,6 @@ class ProcessJob:
             self.handle = None
 
 
-# The bootstrap cannot spawn the engine before the job owns it. If the parent
-# exits before assignment, stdin reaches EOF and the bootstrap exits childless.
-BOOTSTRAP = """
-import subprocess, sys
-if sys.stdin.buffer.read(1) != b'1':
-    sys.exit(1)
-try:
-    result = subprocess.run(sys.argv[1:], stdin=subprocess.DEVNULL,
-                            creationflags=subprocess.CREATE_NO_WINDOW)
-except FileNotFoundError:
-    sys.stderr.write('ERROR: A required program is missing; no module named engine\\n')
-    sys.exit(127)
-sys.exit(result.returncode)
-"""
-
-
 def console_python(executable):
     path = Path(executable)
     if path.name.lower() == "pythonw.exe":
@@ -149,7 +133,7 @@ def start_process(args, *, env):
     try:
         command = [console_python(args[0]), *args[1:]]
         proc = subprocess.Popen(
-            [console_python(sys.executable), "-c", BOOTSTRAP, *command],
+            [console_python(runtime.helper_python()), "-c", runtime.BOOTSTRAP, *command],
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             creationflags=subprocess.CREATE_NO_WINDOW,
             env=env,

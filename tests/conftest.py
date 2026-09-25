@@ -18,6 +18,19 @@ def pytest_addoption(parser):
     parser.addoption(
         "--integration", action="store_true", help="Run real engines against loopback fixtures"
     )
+    parser.addoption(
+        "--engine-helper",
+        help="Run the engines through this portable-build helper executable",
+    )
+
+
+@pytest.fixture(autouse=True)
+def portable_engine_helper(request, monkeypatch):
+    helper = request.config.getoption("--engine-helper")
+    if helper:
+        from mediagrab import runtime
+
+        monkeypatch.setattr(runtime, "helper_python", lambda: helper)
 
 
 def pytest_configure(config):

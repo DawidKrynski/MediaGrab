@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mediagrab"
-version = "0.1.2"
+version = "1.0.0"
 description = "Desktop video and image downloader with clipboard launch and file manager integration"
 readme = "README.md"
 license = "MIT"
