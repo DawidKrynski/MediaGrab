@@ -176,14 +176,15 @@ def main(output):
     sections = []
     for key, dist in everything.items():
         texts = list(license_texts(dist))
-        if not texts and key in VENDORED_LICENSES:
-            if key != "pyside6-essentials":
-                texts = [("(see PySide6 Essentials)", "")]
-            else:
-                texts = [
-                    (name, (VENDORED / name).read_text(encoding="utf-8"))
-                    for name in VENDORED_LICENSES[key]
-                ]
+        # Windows wheels carry only the commercial-license reference; always add the
+        # LGPL path's texts and Qt's attributions (once, under PySide6 Essentials).
+        if key == "pyside6-essentials":
+            texts += [
+                (name, (VENDORED / name).read_text(encoding="utf-8"))
+                for name in VENDORED_LICENSES[key]
+            ]
+        elif key in VENDORED_LICENSES:
+            texts.append(("LGPL-3.0 and GPL-3.0 texts", "See PySide6_Essentials below.\n"))
         texts += list(embedded_notices(dist))
         texts += [
             (name, (VENDORED / name).read_text(encoding="utf-8"))
