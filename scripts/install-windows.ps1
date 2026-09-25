@@ -63,8 +63,9 @@ sys.exit(0 if image.save(sys.argv[1], "ICO") else 1)
         $shortcut.Description = 'Save videos and images from a copied media link'
         $shortcut.Save()
     }
-    if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
-        Write-Host 'For YouTube, also install a Node.js version supported by yt-dlp.'
+    if (-not (Get-Command deno -ErrorAction SilentlyContinue) -and
+        -not (Get-Command node -ErrorAction SilentlyContinue)) {
+        Write-Host 'For YouTube, also install Deno or a Node.js version supported by yt-dlp.'
     }
     Write-Host 'Open MediaGrab from the Start menu. Keep this checkout in place.'
 } catch {

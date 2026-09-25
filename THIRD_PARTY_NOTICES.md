@@ -73,13 +73,25 @@ environment needs its own exact-version inventory.
 
 ## External system programs
 
-- **FFmpeg and ffprobe:** not bundled. License depends on the build and enabled
-  components; see [FFmpeg license guidance](https://ffmpeg.org/legal.html).
-- **Node.js:** not bundled. Node has an MIT license and includes dependencies with
-  additional notices; see the [upstream license](https://github.com/nodejs/node/blob/main/LICENSE).
-- **Python:** supplied by the installation environment and not bundled; see
-  [Python's license](https://docs.python.org/3/license.html).
+- **FFmpeg and ffprobe:** not bundled, including in the portable Windows ZIP. License
+  depends on the build and enabled components; see [FFmpeg license guidance](https://ffmpeg.org/legal.html).
+- **Deno and Node.js:** not bundled. Deno and Node have MIT licenses and include
+  dependencies with additional notices; see the [Deno license](https://github.com/denoland/deno/blob/main/LICENSE.md)
+  and the [Node license](https://github.com/nodejs/node/blob/main/LICENSE).
+- **Python:** supplied by the installation environment for source installations;
+  see [Python's license](https://docs.python.org/3/license.html).
 
-For a frozen executable, AppImage, wheelhouse, virtual-environment archive, or
-container image, inventory the actual contents and supply their complete notices
+## Portable Windows package
+
+The Windows ZIP bundles Python 3.13 and the runtime packages above at the versions
+pinned in `tools/windows/requirements-build.txt` (for example gallery-dl 1.32.13,
+urllib3 2.8.0, and idna 3.20), plus the PyInstaller 6.22.3 bootloader. Its generated
+`THIRD_PARTY_NOTICES.txt` is the authoritative notice file for that package: it
+reproduces the full license texts, Qt's third-party attributions, and the licenses
+of the native libraries inside curl_cffi. Its `sources` folder contains the source
+archives of gallery-dl, mutagen, and certifi. FFmpeg, ffprobe, Deno, and Node are
+not included. See the [portable package review](docs/LICENSING.md#portable-windows-package).
+
+For any other frozen executable, AppImage, wheelhouse, virtual-environment archive,
+or container image, inventory the actual contents and supply their complete notices
 and any required corresponding source. See [distribution review requirements](docs/LICENSING.md#bundled-distributions-require-another-review).

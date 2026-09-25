@@ -27,6 +27,23 @@ No link in the clipboard? Paste it into the small input window and press **Enter
 
 ## Install
 
+### Windows (portable)
+
+1. Download **MediaGrab-Windows-x64.zip** from the
+   [Releases](https://github.com/DawidKrynski/MediaGrab/releases) page and check it
+   against `SHA256SUMS.txt`.
+2. Extract the whole `MediaGrab` folder anywhere you can write, for example
+   `Documents\MediaGrab`, and open **MediaGrab.exe**. No Python installation is needed.
+3. For **videos**, install FFmpeg (`winget install Gyan.FFmpeg`); images work without it.
+   For **YouTube**, also install a JavaScript runtime supported by yt-dlp, such as
+   Deno (`winget install DenoLand.Deno`). Restart MediaGrab afterwards.
+
+Windows may warn about an unsigned app downloaded from the internet; choose
+**More info → Run anyway** only for a ZIP whose checksum matches. Tested on
+Windows 11 x64; see [coverage and limits](docs/VERIFICATION.md).
+
+### Linux and Windows from source
+
 Setup uses the commands below; everyday use is graphical.
 
 <details>
@@ -49,9 +66,9 @@ the menu entry uses it. See [setup and updates](docs/DEVELOPMENT.md) for details
 
 </details>
 
-On **Windows**, follow the [prerequisites](docs/DEVELOPMENT.md#windows-source-installation),
-then double-click **Install-Windows.cmd**. Open MediaGrab from the Start menu.
-Tested on Windows 11; see [coverage and limits](docs/VERIFICATION.md).
+To run a Windows source checkout instead of the portable build, follow the
+[prerequisites](docs/DEVELOPMENT.md#windows-source-installation), then double-click
+**Install-Windows.cmd** and open MediaGrab from the Start menu.
 
 ## Before downloading
 
@@ -65,4 +82,6 @@ to save, following the website's terms.
 
 **License:** MediaGrab's own code is [MIT licensed](LICENSE). Dependencies retain
 their own licenses; see [licensing details](docs/LICENSING.md) and
-[third-party notices](THIRD_PARTY_NOTICES.md).
+[third-party notices](THIRD_PARTY_NOTICES.md). The Windows ZIP bundles Python,
+Qt/PySide6, yt-dlp, and gallery-dl; its `THIRD_PARTY_NOTICES.txt` and `sources`
+folder cover those components.

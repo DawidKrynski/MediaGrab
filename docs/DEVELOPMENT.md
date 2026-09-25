@@ -2,12 +2,14 @@
 
 ## System requirements
 
-MediaGrab targets Linux and Windows. Python 3.11+ and FFmpeg/ffprobe are needed.
+MediaGrab targets Linux and Windows. Source installations need Python 3.11+;
+the portable Windows ZIP includes its own runtime. FFmpeg/ffprobe are needed for videos.
 Linux additionally needs a session D-Bus and the Qt runtime libraries required by
 your desktop. The Python installation supplies PySide6, yt-dlp, and gallery-dl;
 dbus-next is installed only on Linux. Windows verification is tracked in
 [VERIFICATION.md](VERIFICATION.md).
-YouTube extraction can also require Node.js; use a version supported by the
+YouTube extraction can also require a JavaScript runtime: Deno (used automatically
+when on PATH) or Node.js, in a version supported by the
 [installed yt-dlp release](https://github.com/yt-dlp/yt-dlp/wiki/EJS).
 
 Typical system packages on Arch Linux:
@@ -85,9 +87,38 @@ $env:QT_QPA_PLATFORM = "offscreen"
 .\.venv\Scripts\python.exe -m pip check
 ```
 
-Source and an application-only Python wheel are the current distribution scope.
-There is no bundled Windows EXE or dependency archive; those would need a separate
-[license review](LICENSING.md#bundled-distributions-require-another-review).
+Most Windows users should use the portable ZIP described in the README instead.
+
+## Portable Windows build
+
+`tools/build_windows.ps1` builds `dist\MediaGrab-Windows-x64.zip` and
+`dist\SHA256SUMS.txt` on 64-bit Windows. It needs [uv](https://docs.astral.sh/uv/)
+on PATH, network access, and FFmpeg/ffprobe on PATH for the real-engine tests:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\build_windows.ps1
+```
+
+The script creates `build\windows\venv` from the hash-pinned
+`tools\windows\requirements-build.txt` (regenerate it with `uv pip compile` for
+`x86_64-pc-windows-msvc`, Python 3.13, from `pyproject.toml` and
+`tools\windows\build-tools.in`). It then runs Ruff, `uv pip check`, and the full
+test suite with integration tests; collects license texts and downloads the
+source archives of bundled copyleft Python packages (`tools/third_party_notices.py`);
+and runs PyInstaller with `MediaGrab.spec`.
+
+The package is one folder with two executables sharing `_internal`:
+`MediaGrab.exe` (windowed GUI) and `mediagrab-engine.exe` (console helper). The
+helper replaces `python -m yt_dlp` and `python -m gallery_dl` and the Windows job
+bootstrap; it refuses every other interpreter argument. Engines therefore still
+run as separate processes owned by a job object. See `src/mediagrab/runtime.py`.
+
+Before zipping, the script copies the folder outside the checkout, checks both
+bundled engine versions, confirms the helper refuses arbitrary code, reruns the
+real-engine loopback tests through the frozen helper (`--engine-helper`), and
+starts `MediaGrab.exe` without Python. FFmpeg, ffprobe, Deno, and Node are not
+bundled; see [the licensing review](LICENSING.md#portable-windows-package).
+Unsigned builds trigger SmartScreen; code signing is not set up.
 
 ## Linux updating and removal
 
@@ -125,6 +156,10 @@ QT_QPA_PLATFORM=offscreen .venv/bin/python -m pytest -q --integration
 .venv/bin/ruff check .
 .venv/bin/python -m pip check
 ```
+
+`pytest --integration --engine-helper <path>\mediagrab-engine.exe tests/test_integration.py`
+runs the real-engine tests through a portable build's helper instead of the
+current interpreter.
 
 Ordinary tests mock external network access. Opt-in integration tests exercise
 real yt-dlp, gallery-dl, and FFmpeg against small generated media served only on

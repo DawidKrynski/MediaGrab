@@ -71,6 +71,8 @@ Modules are under `src/mediagrab/`:
 | `gui.py` | Detailed PySide6 window, background worker, preferences, previews |
 | `quick.py` | Clipboard launcher, automatic saving, notifications, cancellation |
 | `preferences.py` | Shared destination defaults, including empty saved preferences |
+| `runtime.py` | Engine/bootstrap commands for source installs and the portable build |
+| `engine.py` | Portable-build helper: runs only the bundled engines and the job bootstrap |
 
 Ordinary tests must mock external access. Real-engine integration tests use local
 HTTP fixtures only. Separate automated results from native desktop observations

@@ -12,6 +12,8 @@ $env:QT_QPA_PLATFORM = 'offscreen'
 
 function Invoke-Step([string]$Message, [scriptblock]$Command) {
     Write-Host "== $Message"
+    # Native tools report progress on stderr; judge them by exit code only.
+    $ErrorActionPreference = 'Continue'
     & $Command
     if ($LASTEXITCODE) { throw "$Message failed (exit $LASTEXITCODE)" }
 }
@@ -64,10 +66,13 @@ try {
     Copy-Item (Join-Path $dist 'MediaGrab') $test -Recurse
     $app = Join-Path $test 'MediaGrab'
     $engine = Join-Path $app 'mediagrab-engine.exe'
-    $ytdlp = (& $engine -m yt_dlp --version | Out-String).Trim()
-    if ($LASTEXITCODE -or -not $ytdlp) { throw 'Bundled yt-dlp did not start' }
-    $gallery = (& $engine -m gallery_dl --version | Out-String).Trim()
-    if ($LASTEXITCODE -or -not $gallery) { throw 'Bundled gallery-dl did not start' }
+    Invoke-Step 'Bundled engine versions' {
+        $script:ytdlp = (& $engine -m yt_dlp --version | Out-String).Trim()
+        if (-not $LASTEXITCODE) {
+            $script:gallery = (& $engine -m gallery_dl --version | Out-String).Trim()
+        }
+    }
+    if (-not $ytdlp -or -not $gallery) { throw 'Bundled engines reported no version' }
     $refused = Start-Process -FilePath $engine -ArgumentList '-c', 'print(1)' -Wait -PassThru `
         -NoNewWindow -RedirectStandardError (Join-Path $test 'refused.txt')
     if ($refused.ExitCode -ne 2) { throw 'The engine helper accepted arbitrary code' }

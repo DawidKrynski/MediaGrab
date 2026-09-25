@@ -34,7 +34,7 @@ BUILD_TOOLS = ["pyinstaller"]
 # Qt for Python wheels carry no license files; ship the texts of the chosen LGPL path.
 VENDORED = Path(__file__).with_name("windows") / "licenses"
 VENDORED_LICENSES = {
-    key: ["LGPL-3.0.txt", "GPL-3.0.txt"]
+    key: ["LGPL-3.0.txt", "GPL-3.0.txt", "Qt-attributions.txt"]
     for key in ("pyside6", "pyside6-essentials", "pyside6-addons", "shiboken6")
 }
 # Native payloads whose wheels ship no license texts for their statically linked code.
@@ -143,6 +143,8 @@ def main(output):
     ]
     for key, dist in everything.items():
         role = " (bootloader only)" if key in tools else ""
+        if key == "pyside6-addons":
+            role = " (installed with PySide6; none of its modules are shipped)"
         header.append(
             f"  {dist.metadata['Name']} {dist.version}: {license_label(dist)}{role}"
         )

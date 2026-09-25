@@ -6,6 +6,7 @@ Usage:
 """
 
 import hashlib
+from importlib.metadata import PackageNotFoundError, distribution
 from pathlib import Path
 import shutil
 import sys
@@ -27,7 +28,20 @@ def assemble(frozen, notices, output):
     for required in ("MediaGrab.exe", "mediagrab-engine.exe", "_internal"):
         if not (folder / required).exists():
             raise RuntimeError(f"Portable folder is missing {required}")
+    check_no_addons(folder)
     return folder
+
+
+def check_no_addons(folder):
+    """The notices treat PySide6 Addons as installed but not shipped; enforce that."""
+    try:
+        files = distribution("PySide6_Addons").files or ()
+    except PackageNotFoundError:
+        return
+    native = {file.name.lower() for file in files if file.suffix.lower() in {".dll", ".pyd"}}
+    shipped = {path.name.lower() for path in folder.rglob("*") if path.is_file()}
+    if native & shipped:
+        raise RuntimeError(f"PySide6 Addons binaries were bundled: {sorted(native & shipped)}")
 
 
 def archive(folder, output):

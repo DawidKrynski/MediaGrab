@@ -1,6 +1,6 @@
 # Licensing
 
-Review date: 2026-09-21.
+Review date: 2026-09-21; portable Windows package reviewed 2026-09-25.
 
 MediaGrab's own source code and assets are covered by the [MIT license](../LICENSE).
 Its dependencies retain their respective licenses; MIT does not relicense them.
@@ -9,10 +9,13 @@ their source code.
 
 ## Current source distribution
 
-The repository contains the application, its own icon and screenshots, tests, and
-documentation. It does not contain downloader sources, dependency wheels, native
-libraries, or a bundled Python environment. The application-only Python wheel
-also declares dependencies for separate installation.
+The repository contains the application, its own icon and screenshots, tests,
+documentation, and the Windows build tooling, including verbatim license texts
+used by the portable package (`tools/windows/licenses/`). It does not contain
+downloader sources, dependency wheels, native libraries, or a bundled Python
+environment. The application-only Python wheel also declares dependencies for
+separate installation. The portable Windows ZIP is a separate, bundled
+distribution; see [below](#portable-windows-package).
 
 The review covered declared licenses and available license files for **29 Python
 packages**, including runtime dependencies and development tools. The exact
@@ -74,8 +77,59 @@ texts, copyright notices, and any required corresponding source:
 
 Recheck this review whenever dependencies, integration, or packaging change.
 
-## Media and names
+## Portable Windows package
 
-Software licenses do not grant rights to other people's media. Download and share
-only content you are permitted to use and comply with applicable service terms.
-Service and project names describe integration, not affiliation or endorsement.
+`MediaGrab-Windows-x64.zip` is built by `tools/build_windows.ps1` with PyInstaller.
+It contains MediaGrab, a CPython 3.13 runtime (with OpenSSL, libffi, SQLite,
+bzip2, xz, zlib, and Microsoft Visual C++ runtime DLLs), Qt 6/PySide6 (Core, GUI,
+Widgets, SVG, Network, and their plugins), yt-dlp with yt-dlp-ejs, gallery-dl,
+curl_cffi with its libcurl-impersonate DLL, and their Python dependencies. The
+build installs PySide6 Addons as a dependency of PySide6 but the packaging step
+fails if any Addons binary is shipped.
+
+How the package meets the reviewed obligations:
+
+- **Notices:** `THIRD_PARTY_NOTICES.txt` in the ZIP lists every bundled Python
+  distribution with its version and declared license and reproduces its license
+  files, the Python license, the LGPLv3 and GPLv3 texts for Qt/PySide6 (whose
+  wheels ship none), Qt's third-party attributions for the bundled modules, the
+  license headers embedded in the yt-dlp JavaScript solvers, and the licenses of
+  libraries statically linked into libcurl-impersonate (curl, BoringSSL, nghttp2,
+  ngtcp2, nghttp3, Brotli, zstd, zlib).
+- **Copyleft source:** the `sources` folder carries the exact PyPI source archives
+  of gallery-dl (GPL-2.0-only), mutagen (GPL-2.0-or-later), and certifi (MPL-2.0),
+  checked against PyPI's SHA-256 digests. MediaGrab's own source is this repository.
+- **Qt/PySide6 (LGPLv3):** used unmodified as separate DLL/PYD files in
+  `_internal\PySide6`, which users can replace with compatible builds. The notices
+  point to the exact Qt for Python and Qt source releases on download.qt.io
+  instead of shipping the Qt sources.
+- **PyInstaller:** its bootloader is GPL-2.0 with an exception that permits
+  distributing it with any program.
+
+Decisions:
+
+- **FFmpeg/ffprobe are not bundled.** Suitable Windows builds (Gyan: GPLv3 with
+  many external libraries; BtbN: LGPL/GPL variants) oblige a redistributor to
+  provide the complete corresponding source of FFmpeg and every linked library
+  for that exact build. BtbN keeps daily builds for only 14 days, so upstream
+  links cannot be relied on for the required availability, and hosting those
+  sources would multiply the package size. Users install FFmpeg separately
+  (for example `winget install Gyan.FFmpeg`); images work without it.
+- **No JavaScript runtime is bundled.** yt-dlp needs Deno, Node, or QuickJS only
+  for YouTube; Deno is enabled by default when it is on PATH, and MediaGrab adds
+  Node when found. Bundling one would add a large separately licensed binary.
+
+Open points before publishing a release:
+
+- Qt/PySide6 corresponding source is provided by reference to download.qt.io,
+  not in the release. If that is not considered sufficient, attach the matching
+  Qt for Python and Qt source archives to the release or add a written offer.
+- The helper process combines gallery-dl (GPL-2.0-only) with Apache-2.0 code
+  (requests, Python's OpenSSL 3, BoringSSL). The FSF considers Apache-2.0
+  incompatible with GPLv2-only. gallery-dl's own Windows executable is a PyInstaller
+  build with the same combination; this is noted as a residual risk, not
+  resolved legal advice.
+- yt-dlp documents its own PyInstaller executables as GPLv3+ combined works
+  (GPL-2.0-or-later mutagen together with Apache-2.0 components). In MediaGrab's
+  helper, GPL-2.0-only gallery-dl joins that combination, which is why the
+  previous point matters. MediaGrab's own code remains MIT licensed.

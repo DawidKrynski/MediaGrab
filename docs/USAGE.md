@@ -115,7 +115,10 @@ Engine default configuration and persistent authentication caches are disabled.
 
 - **Dependency:** check `ffmpeg -version`, `ffprobe -version`, `node --version`,
   `.venv/bin/python -m yt_dlp --version`, and `.venv/bin/python -m gallery_dl --version`.
-  In Windows PowerShell, replace `.venv/bin/python` with `.\.venv\Scripts\python.exe`.
+  In Windows PowerShell, replace `.venv/bin/python` with `.\.venv\Scripts\python.exe`;
+  in the portable build, use `.\mediagrab-engine.exe -m yt_dlp --version` (and
+  `-m gallery_dl`) from the MediaGrab folder. Restart MediaGrab after installing
+  FFmpeg, Deno, or Node so it sees the updated PATH.
 - **Unsupported:** try a canonical single-post URL and update the engines. Short,
   user/profile, search, or redirect URLs may not expose a downloadable entry.
 - **Access:** Instagram supplied no media data. The post may be unavailable or
