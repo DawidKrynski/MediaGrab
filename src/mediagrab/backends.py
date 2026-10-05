@@ -11,6 +11,17 @@ from .routing import is_single_url, source_name
 from .runtime import engine_command
 
 MAX_ITEMS = 100
+# Browsers both engines can read on Linux and Windows. Used only after an explicit choice.
+COOKIE_BROWSERS = ("brave", "chrome", "chromium", "edge", "firefox", "opera", "vivaldi")
+
+
+def cookie_arguments(cookies, browser):
+    # An explicitly selected file wins; the browser session is never a silent fallback.
+    if cookies:
+        return ["--cookies", cookies]
+    if browser:
+        return ["--cookies-from-browser", browser]
+    return []
 
 
 def json_output(output):
@@ -55,8 +66,8 @@ def quality(meta):
 class YtDlpAdapter:
     name = "ytdlp"
 
-    def __init__(self, runner, cookies=""):
-        self.runner, self.cookies = runner, cookies
+    def __init__(self, runner, cookies="", browser=""):
+        self.runner, self.cookies, self.browser = runner, cookies, browser
 
     def base(self):
         args = [
@@ -74,9 +85,7 @@ class YtDlpAdapter:
         ]
         if shutil.which("node"):
             args += ["--js-runtimes", "node"]
-        if self.cookies:
-            args += ["--cookies", self.cookies]
-        return args
+        return args + cookie_arguments(self.cookies, self.browser)
 
     def inspect(self, url, allow_collection=False):
         data = json_output(
@@ -232,8 +241,8 @@ def gallery_identity(meta):
 class GalleryAdapter:
     name = "gallery"
 
-    def __init__(self, runner, cookies=""):
-        self.runner, self.cookies = runner, cookies
+    def __init__(self, runner, cookies="", browser=""):
+        self.runner, self.cookies, self.browser = runner, cookies, browser
 
     def base(self):
         args = [
@@ -270,9 +279,7 @@ class GalleryAdapter:
             "-o",
             "extractor.cookies-update=false",
         ]
-        if self.cookies:
-            args += ["--cookies", self.cookies]
-        return args
+        return args + cookie_arguments(self.cookies, self.browser)
 
     def inspect(self, url, allow_collection=False):
         if not is_single_url(url) and not allow_collection:

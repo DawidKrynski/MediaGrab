@@ -234,3 +234,19 @@ def test_background_tray_mode_hides_the_input(qtbot, tmp_path, monkeypatch):
     window.cancel()
     qtbot.waitUntil(lambda: window.worker is None)
     window.close()
+
+
+def test_quick_mode_uses_the_saved_browser_cookie_choice(quick, qtbot, monkeypatch):
+    window, _ = quick
+    window.settings.setValue("cookies_browser", "brave")
+    seen = []
+
+    def inspect(service, *args):
+        seen.append(service.adapters["gallery"].browser)
+        raise MediaError("access", "No media")
+
+    monkeypatch.setattr(MediaService, "inspect", inspect)
+    window.url.setText("https://instagram.com/p/post/")
+    qtbot.keyClick(window.url, Qt.Key.Key_Return)
+    qtbot.waitUntil(lambda: window.worker is None)
+    assert seen == ["brave"]

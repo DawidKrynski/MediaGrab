@@ -23,7 +23,7 @@ No link in the clipboard? Paste it into the small input window and press **Enter
 - **Choose what to save:** use the full window for individual items and settings.
 - **Stay in control:** progress, cancellation, and confirmation before collections.
 - **Keep existing files:** content-checked duplicates and no-overwrite downloads.
-- **Keep it local:** clipboard read once per launch; no automatic browser-cookie access.
+- **Keep it local:** clipboard read once per launch; browser cookies are read only after you pick a browser.
 
 ## Install
 

@@ -123,6 +123,11 @@ def classify_error(text: str) -> MediaError:
         return MediaError(
             "unsupported", "This type of media link is not supported by the downloader."
         )
+    if any(x in s for x in ("cookies database", "failed to load cookies")):
+        return MediaError(
+            "cookies",
+            "Could not read cookies from the selected browser. Check that it is installed and signed in, or choose a cookies file instead.",
+        )
     if any(
         x in s
         for x in (
@@ -142,7 +147,7 @@ def classify_error(text: str) -> MediaError:
     ):
         return MediaError(
             "login",
-            "The website requires authentication for this request. If you already have a cookies file, select it with Choose…, then click Inspect again.",
+            "The website requires authentication for this request. In the full window, pick a signed-in browser under Browser cookies or choose a cookies file, then try again.",
         )
     if any(
         x in s

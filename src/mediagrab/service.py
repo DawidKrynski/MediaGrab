@@ -3,22 +3,24 @@ import sqlite3
 from dataclasses import replace
 from pathlib import Path
 
-from .backends import GalleryAdapter, YtDlpAdapter
+from .backends import COOKIE_BROWSERS, GalleryAdapter, YtDlpAdapter
 from .models import BatchResult, Cancelled, CollectionRequired, MediaError, Inspection
 from .routing import is_single_url, route, validate_url
 from .storage import Store, contained
 
 
 class MediaService:
-    def __init__(self, runner, cookies=""):
+    def __init__(self, runner, cookies="", browser=""):
         self.runner = runner
         if cookies and not Path(cookies).expanduser().is_file():
             raise MediaError("cookies", "The explicitly selected cookies file does not exist.")
+        if browser and browser not in COOKIE_BROWSERS:
+            raise MediaError("cookies", "The selected browser is not supported for cookies.")
         # Engines may update cookie jars. Operate only on a private, disposable copy,
         # leaving the user's supplied file untouched. Created by each GUI worker.
         self.adapters = {
-            "gallery": GalleryAdapter(runner, cookies),
-            "ytdlp": YtDlpAdapter(runner, cookies),
+            "gallery": GalleryAdapter(runner, cookies, browser),
+            "ytdlp": YtDlpAdapter(runner, cookies, browser),
         }
 
     def inspect(self, url, allow_collection=False, _depth=0):

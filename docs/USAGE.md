@@ -14,9 +14,12 @@ Open the desktop launcher’s **Full window** action; developers can use
 3. Change the download root if desired. Site folders are added automatically:
    `youtube`, `instagram`, `x`, `tiktok`, `reddit`, `facebook`; other hosts get a
    sanitized hostname. Public content may still be restricted by the website.
-4. Optionally choose an explicit Netscape-format cookies file for login-only
-   content. The app uses a private, disposable copy, never the browser profile,
-   and never logs cookies or raw engine errors. The original file is not modified.
+4. For login-only content, optionally pick a signed-in browser under **Browser
+   cookies** (off by default), or choose an explicit Netscape-format cookies file.
+   The download engines read the selected browser's session for each request;
+   MediaGrab does not store or log it. A cookies file is used through a private,
+   disposable copy, the original is not modified, and it takes precedence over the
+   browser choice. The quick launcher uses the same saved choice.
 5. Click **Download selected**. Best available video plus audio is the default;
    FFmpeg merges streams without intentional re-encoding. Progress is per item
    with a batch counter; gallery-dl transfers use an indeterminate progress bar.
@@ -44,7 +47,7 @@ This is not a universal downloader, and no access restrictions are bypassed.
 | Input | Preferred engine | Notes |
 | --- | --- | --- |
 | YouTube video/short/live or explicit playlist selection | yt-dlp | FFmpeg for separate streams; Node/EJS for challenges. Live streams can be long-running; Cancel is available. |
-| Instagram post / carousel | gallery-dl | Images and videos stay separate selectable entries; access may require an explicitly supplied cookies file. |
+| Instagram post / carousel | gallery-dl | Images and videos stay separate selectable entries; access usually requires a selected browser session or cookies file. |
 | Instagram reel / TV video | yt-dlp | Uses its public-video extraction with the installed networking transport. Anonymous access can still be restricted. |
 | X/Twitter status | gallery-dl | Retweets/quoted posts are not recursively expanded. Login/rate limits depend on the site. |
 | TikTok photo/video post | gallery-dl | Photos, accompanying audio, and video remain selectable; video extraction can delegate internally to yt-dlp. |
@@ -67,7 +70,7 @@ expand into an implicit download. Metadata resolution has a depth limit of three
 
 Quality labels use available metadata; flat playlist entries may have incomplete
 quality information. Downloads still request the best available formats. There is
-no quality picker, video-to-MP3 conversion, DRM support, browser credential lookup,
+no quality picker, video-to-MP3 conversion, DRM support, password or saved-login lookup,
 PO-token configuration, or guarantee of private/account-only access. An ordinary
 network/engine error is deliberately reported with a sanitized category rather
 than potentially sensitive raw stderr.
@@ -107,8 +110,8 @@ never automatically treated as completed files.
 
 Preferences use Qt's `QSettings`: normally `~/.config/MediaGrab/MediaGrab.conf` on
 Linux, or `HKEY_CURRENT_USER\Software\MediaGrab\MediaGrab` on Windows.
-Only preferences and the explicitly supplied cookies-file **path** are persisted
-there. The application does not persist extracted metadata or CDN URLs in its index.
+Only preferences, the explicitly supplied cookies-file **path**, and the selected
+browser **name** are persisted there; browser cookies themselves are never saved. The application does not persist extracted metadata or CDN URLs in its index.
 Engine default configuration and persistent authentication caches are disabled.
 
 ## Troubleshooting
@@ -123,8 +126,12 @@ Engine default configuration and persistent authentication caches are disabled.
   user/profile, search, or redirect URLs may not expose a downloadable entry.
 - **Access:** Instagram supplied no media data. The post may be unavailable or
   restricted to anonymous requests; this alone does not establish expired cookies.
-- **Login:** if you already have a valid Netscape cookies file, select it using **Choose…**. Account access is not
+- **Login:** pick the browser where you are signed in under **Browser cookies**, or
+  select a valid Netscape cookies file using **Choose…**. Account access is not
   created or repaired by this application.
+- **Cookies:** the selected browser's cookies could not be read. Check that the
+  browser is installed and signed in; on Linux the desktop keyring must be unlocked.
+  Chromium-based browsers on Windows may refuse access; use Firefox or a cookies file.
 - **Rate limit:** stop and retry later. Repeated engine switching is avoided.
 - **Unavailable:** content may be private, deleted, geographically restricted, or
   access denied; cookies cannot guarantee availability.

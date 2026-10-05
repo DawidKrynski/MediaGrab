@@ -12,6 +12,7 @@ from PySide6.QtGui import QIcon, QPixmap
 from PySide6.QtWidgets import (
     QApplication,
     QCheckBox,
+    QComboBox,
     QFileDialog,
     QHBoxLayout,
     QHeaderView,
@@ -28,6 +29,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from .backends import COOKIE_BROWSERS
 from .models import BatchResult, MediaError, default_selection, selected_items
 from .preferences import download_destination
 from .privacy import protect_private_directory
@@ -49,6 +51,7 @@ class Worker(QThread):
         *,
         url="",
         cookies="",
+        browser="",
         items=None,
         root="",
         allow=False,
@@ -57,6 +60,7 @@ class Worker(QThread):
     ):
         super().__init__(parent)
         self.action, self.url, self.cookies = action, url, cookies
+        self.browser = browser
         self.items, self.root, self.allow = items or [], root, allow
         self.previews = previews
         self.cancel_event = Event()
@@ -73,7 +77,7 @@ class Worker(QThread):
                     cookies = str(Path(private) / "cookies.txt")
                     shutil.copyfile(original, cookies)
                     os.chmod(cookies, 0o600)
-                service = MediaService(Runner(self.cancel_event), cookies)
+                service = MediaService(Runner(self.cancel_event), cookies, self.browser)
                 if self.action == "inspect":
                     result = service.inspect(self.url, self.allow)
                     self.inspected.emit(result)
@@ -188,12 +192,28 @@ class MainWindow(QMainWindow):
         cookie_row = QHBoxLayout()
         cookie_row.addWidget(QLabel("Cookies file (optional)"))
         self.cookies = QLineEdit(str(self.settings.value("cookies_path", "")))
-        self.cookies.setPlaceholderText("Explicit Netscape cookies.txt file; no browser access")
+        self.cookies.setPlaceholderText("Explicit Netscape cookies.txt file")
         self.cookies.setClearButtonEnabled(True)
         self.browse_cookies = QPushButton("Choose…")
         cookie_row.addWidget(self.cookies, 1)
         cookie_row.addWidget(self.browse_cookies)
         layout.addLayout(cookie_row)
+        browser_row = QHBoxLayout()
+        browser_row.addWidget(QLabel("Browser cookies (optional)"))
+        self.browser = QComboBox()
+        self.browser.addItem("Off", "")
+        for name in COOKIE_BROWSERS:
+            self.browser.addItem(name.title(), name)
+        self.browser.setCurrentIndex(
+            max(0, self.browser.findData(str(self.settings.value("cookies_browser", ""))))
+        )
+        self.browser.setToolTip(
+            "Off by default. When a browser is picked, its signed-in session is read for each "
+            "request and never stored. A selected cookies file takes precedence."
+        )
+        browser_row.addWidget(self.browser)
+        browser_row.addStretch()
+        layout.addLayout(browser_row)
         self.progress_bar = QProgressBar()
         self.progress_bar.setRange(0, 100)
         self.progress_bar.setValue(0)
@@ -229,11 +249,13 @@ class MainWindow(QMainWindow):
         self.browse_destination.clicked.connect(self.choose_destination)
         self.browse_cookies.clicked.connect(self.choose_cookies)
         self.auto.toggled.connect(self.save_preferences)
+        self.browser.currentIndexChanged.connect(self.save_preferences)
 
     def save_preferences(self):
         self.settings.setValue("auto_single", self.auto.isChecked())
         self.settings.setValue("destination", self.destination.text())
         self.settings.setValue("cookies_path", self.cookies.text())
+        self.settings.setValue("cookies_browser", self.browser.currentData())
         self.settings.sync()
 
     def choose_destination(self):
@@ -270,7 +292,13 @@ class MainWindow(QMainWindow):
             return
         self.save_preferences()
         self.details.hide()
-        self.worker = Worker(action, cookies=self.cookies.text().strip(), parent=self, **kwargs)
+        self.worker = Worker(
+            action,
+            cookies=self.cookies.text().strip(),
+            browser=self.browser.currentData(),
+            parent=self,
+            **kwargs,
+        )
         self.worker.inspected.connect(self.on_inspected)
         self.worker.downloaded.connect(self.on_downloaded)
         self.worker.failed.connect(self.on_error)
@@ -288,6 +316,7 @@ class MainWindow(QMainWindow):
             self.browse_destination,
             self.cookies,
             self.browse_cookies,
+            self.browser,
             self.open_button,
             self.select_all,
             self.select_none,

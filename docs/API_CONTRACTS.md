@@ -19,7 +19,8 @@ and [output templates](https://github.com/yt-dlp/yt-dlp#output-template):
   processing; `--no-simulate` ensures printing does not suppress download.
 - `--progress-template download:MGPROGRESS:%(progress)j` supplies structured progress.
 - `--cookies FILE`, `--ignore-config`, `--no-cache-dir`, and Node `--js-runtimes`
-  are verified CLI options. No browser cookies are requested.
+  are verified CLI options. `--cookies-from-browser NAME` is passed only for an
+  explicitly selected browser and never together with `--cookies FILE`.
 
 The package's default extra supplies EJS. See [official extractor notes](https://github.com/yt-dlp/yt-dlp/wiki/Extractors)
 for website-specific restrictions and token limitations. Local real-engine tests
@@ -46,6 +47,8 @@ and [extractor message definitions](https://github.com/mikf/gallery-dl/blob/mast
   implementations and a real loopback image download.
 - `--range` and `--child-range` bound extraction. `--config-ignore --no-input`,
   `cache.file=null`, and explicit `--cookies FILE` isolate configuration/authentication.
+  `--cookies-from-browser NAME` follows the same explicit-selection rule as yt-dlp;
+  `extractor.cookies-update=false` keeps the engine from writing cookies back.
 - Configured video delegation for Reddit/Facebook/TikTok uses documented `videos=ytdl`;
   `downloader.ytdl.raw-options` disables playlist expansion and sets quiet output.
 
@@ -73,7 +76,8 @@ file manager implements selection correctly.
 Reel/reels/TV single-video URLs now use yt-dlp first; `/p/` posts continue to use
 gallery-dl to preserve carousel images. The official
 [yt-dlp impersonation dependency](https://github.com/yt-dlp/yt-dlp#impersonation)
-`curl-cffi` is installed through the documented extra. No browser profile is read.
+`curl-cffi` is installed through the documented extra. A browser profile is read
+only when the user selected that browser under **Browser cookies**.
 
 An empty-media response containing general cookie-help text is classified as
 `access`, not as an affirmative authentication/expired-cookie error. Rate-limit

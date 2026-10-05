@@ -30,8 +30,11 @@ monitoring, clipboard-history lookup, or implicit collection downloads.
   and unavailable errors distinct. Terminal errors take precedence over warnings.
 - Do not log cookies, authenticated metadata, or raw backend stderr. Disable
   inherited engine configuration and persistent authentication caches.
-- Browser cookies are never extracted automatically. An explicitly selected
-  Netscape cookies file is copied privately for the job; the original is unchanged.
+- Browser cookies are never read by default or as a fallback. Only a browser the
+  user picked under **Browser cookies** (allowlist `COOKIE_BROWSERS`) is passed to
+  the engines, which read it per request; MediaGrab stores the browser name only.
+  An explicitly selected Netscape cookies file is copied privately for the job,
+  leaves the original unchanged, and takes precedence over the browser choice.
 
 ## File safety
 

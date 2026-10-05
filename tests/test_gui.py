@@ -142,3 +142,28 @@ def test_gui_reports_instagram_empty_response_without_login_claim(qtbot, tmp_pat
     assert "expired" not in window.status.text()
     assert not window.download_button.isEnabled()
     assert window.inspect_button.isEnabled()
+
+
+def test_browser_cookies_are_off_until_selected_and_reach_the_engines(qtbot, tmp_path, monkeypatch):
+    seen = []
+
+    def inspect(service, *args):
+        seen.append((service.adapters["gallery"].browser, service.adapters["ytdlp"].browser))
+        return Inspection([media()])
+
+    monkeypatch.setattr(MediaService, "inspect", inspect)
+    settings = QSettings(str(tmp_path / "s.ini"), QSettings.Format.IniFormat)
+    window = MainWindow(settings)
+    qtbot.addWidget(window)
+    assert window.browser.currentData() == ""
+    window.url.setText("https://youtu.be/1")
+    window.inspect()
+    qtbot.waitUntil(lambda: window.worker is None)
+    window.browser.setCurrentIndex(window.browser.findData("firefox"))
+    assert settings.value("cookies_browser") == "firefox"
+    window.inspect()
+    qtbot.waitUntil(lambda: window.worker is None)
+    assert seen == [("", ""), ("firefox", "firefox")]
+    restored = MainWindow(settings)
+    qtbot.addWidget(restored)
+    assert restored.browser.currentData() == "firefox"

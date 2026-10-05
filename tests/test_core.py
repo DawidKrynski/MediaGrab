@@ -478,3 +478,26 @@ def test_reel_inspection_does_not_require_gallery_authentication():
     result = MediaService(runner).inspect("https://www.instagram.com/reels/reel-id/")
     assert result.items[0].backend == "ytdlp"
     assert len(runner.calls) == 1 and "yt_dlp" in runner.calls[0]
+
+
+def test_engines_read_no_browser_cookies_unless_one_is_selected():
+    for adapter in (YtDlpAdapter, GalleryAdapter):
+        assert "--cookies-from-browser" not in adapter(None).base()
+        assert adapter(None, "", "brave").base()[-2:] == ["--cookies-from-browser", "brave"]
+        # An explicitly selected file is never combined with the browser session.
+        both = adapter(None, "/private/cookies.txt", "brave").base()
+        assert both[-2:] == ["--cookies", "/private/cookies.txt"]
+        assert "--cookies-from-browser" not in both
+
+
+def test_service_rejects_unknown_cookie_browser():
+    with pytest.raises(MediaError) as caught:
+        MediaService(FakeRunner([]), browser="brave:Profile 1")
+    assert caught.value.kind == "cookies"
+    assert MediaService(FakeRunner([]), browser="firefox").adapters["gallery"].browser == "firefox"
+
+
+def test_unreadable_browser_cookies_are_not_reported_as_login():
+    error = classify_error('ERROR: could not find brave cookies database in "/home/user/.config"')
+    assert error.kind == "cookies"
+    assert "/home/user" not in str(error)

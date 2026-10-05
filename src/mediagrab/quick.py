@@ -190,6 +190,7 @@ class QuickWindow(QDialog):
             action,
             url=self.url.text(),
             cookies=cookies,
+            browser=str(self.settings.value("cookies_browser", "")),
             root=root,
             previews=False,
             parent=self,

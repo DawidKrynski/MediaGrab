@@ -139,7 +139,11 @@ Cookie tests use synthetic files, not real credentials. Run the commands in
 - Download and merge fixtures are small, generated local files. They do not prove
   current YouTube, Instagram, X, TikTok, Reddit, or Facebook compatibility.
 - Login, real cookies, rate limits, private media, and site-specific mixed posts
-  have not been established by this test suite.
+  have not been established by this test suite. Browser-cookie selection is covered
+  by argument and preference tests only; one manual Linux check (Brave, KWallet,
+  2026-10-05) inspected and saved a six-image public Instagram carousel that the
+  anonymous request rejected with a login error. Other browsers, keyrings, and
+  Windows were not observed.
 - Offscreen GUI checks cannot confirm Wayland clipboard permissions, notification
   delivery, tray integration, or file-manager highlighting.
 - A successful D-Bus call does not prove that a nonconforming file manager selected
